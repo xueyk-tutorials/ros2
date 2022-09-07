@@ -121,7 +121,7 @@ cmake \
 git \
 python3-colcon-common-extensions \
 python3-pip \
-python-rosdep \
+python3-rosdep \
 python3-vcstool \
 wget
 ```
