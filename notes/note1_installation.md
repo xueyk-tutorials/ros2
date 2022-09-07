@@ -30,9 +30,9 @@ https://docs.ros2.org/dashing/api/rclpy/index.html
 ### 设置编码
 
 ```shell
-$sudo locale-gen en_US en_US.UTF-8
-$sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
-$export LANG=en_US.UTF-8
+$ sudo locale-gen en_US en_US.UTF-8
+$ sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+$ export LANG=en_US.UTF-8
 ```
 
 ### 下载GPGkey
@@ -129,7 +129,11 @@ python3-vcstool \
 wget
 ```
 
+## 卸载
 
+```shell
+rm -rf ~/ros2_foxy    # 这里是卸载foxy版本，如果安装的是其他版本，对应修改即可
+```
 
 ## Docker安装
 
@@ -171,7 +175,7 @@ https://www.allisonthackston.com/articles/vscode-docker-ros2.html
 
 ### 智能提示
 
-选择设置->Command Palette，输入configuration，选择c/c++ Edit configuration，打开c_cpp_properties.json后，添加ros的头文件路径即可！
+选择设置->Command Palette（快捷键ctrl+shift+P)，输入configuration，选择c/c++ Edit configuration，打开c_cpp_properties.json后，在`includePath`中添加ros的头文件路径即可！
 
 ```json
 {
@@ -194,7 +198,7 @@ https://www.allisonthackston.com/articles/vscode-docker-ros2.html
 }
 ```
 
-
+这种方式，对于远程连接开发也是有效的。
 
 ## 测试
 

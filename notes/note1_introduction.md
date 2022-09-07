@@ -54,15 +54,39 @@ ROS2的通信是基于成熟的DDS，DDS是一套协议标准，各厂商根据�
 
 ## 学习资料
 
-- 官方文档：[Tutorials — ROS 2 Documentation: Foxy documentation](https://docs.ros.org/en/foxy/Tutorials.html)
-- API-rclcpp：[rclcpp: rclcpp: ROS Client Library for C++ (ros2.org)](https://docs.ros2.org/foxy/api/rclcpp/)
-- API-RCL：https://docs.ros2.org/latest/api/rcl/
+### 基础资料
+
+- 官方文档：
+
+  [Tutorials — ROS 2 Documentation: Foxy documentation](https://docs.ros.org/en/foxy/Tutorials.html)
+
+- API-rclcpp：
+
+  [rclcpp: rclcpp: ROS Client Library for C++ (ros2.org)](https://docs.ros2.org/foxy/api/rclcpp/)
+
+- API-RCL：
+
+  https://docs.ros2.org/latest/api/rcl/
 
 > 可以通过修改网址内ROS2版本，进行版本文档的切换，例如将网址中的foxy换成dashing，就可以进入dashing版本的说明文档网页。
 
+### ROS2 package相关资料
+
+- 功能包索引列表ROS Index：
+
+  地址：https://index.ros.org/packages/page/1/time/
+
+  该列表包括了ROS1 ROS2所有的开源功能包，并且包括了github仓库链接、相关使用或API链接。可以通过页面提供的检索功能找到感兴趣的功能包相关资料。
+
+  例如[geometry_msgs相关说明](https://index.ros.org/p/geometry_msgs/github-ros2-common_interfaces/#foxy)。
+
+- 功能包API：
+
+  这个是由doxygen生成的API网页，包括了各功能包的API说明。
+
+  例如tf2相关API说明在[tf2: Main Page (ros.org)](http://docs.ros.org/en/api/tf2/html/index.html)。
 
 
-- tf2_eigen：http://docs.ros.org/en/noetic/api/tf2_eigen/html/
 
 ## 基本概念理解
 
