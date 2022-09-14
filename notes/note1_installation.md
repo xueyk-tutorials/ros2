@@ -165,6 +165,8 @@ $ docker run -it --rm osrf/ros:foxy-desktop ros2 run demo_nodes_cpp listener
 
 ```shell
 sudo apt-get install ros-foxy-turtle-tf2-py ros-foxy-tf2-tools ros-foxy-tf-transformations
+
+sudo apt install ros-foxy-demo-nodes-cpp
 ```
 
 
