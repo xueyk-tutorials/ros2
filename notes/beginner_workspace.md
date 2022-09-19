@@ -92,3 +92,13 @@ colcon build后边还可以跟一些常用的参数：
 3. --packages-select： 选择要编译的package
 4. --event-handlers console_direct+ ：在终端中显示编译过程中的详细日志
 
+
+
+## 安装工程依赖
+
+检查工程相关的依赖是否齐全并且安装缺少的packages。
+
+```shell
+$ rosdep install -i --from-path src --rosdistro foxy -y
+```
+

@@ -118,3 +118,13 @@ $ ros2 run demo_nodes_cpp talker __params:=demo_params.yaml
 $ ros2 param get /AutoAttacking "KP_drone_yaw"
 ```
 
+
+
+### 通过命令行传参
+
+如下的例子将talker节点变为my_talker节点。发布的topic从chatter改名为my_topic。用于限定topic/service的名字空间被设为/demo，这样使用topic时就变为/demo/my_topic，而非全局化的/my_topic。
+
+```shell
+ros2 run demo_nodes_cpp talker __ns:=/demo __node:=my_talker chatter:=my_topic
+```
+
