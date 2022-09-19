@@ -46,7 +46,7 @@ private:
     void printf_qos(rclcpp::QoS &qos)
     {
         // 查看QOS参数
-        // 获取mw_qos_profile_t
+        // 获取rmw_qos_profile_t
         // rclcpp::rmw_qos_profile_t qos_profile = qos.get_rmw_qos_profile();
         auto qos_profile = qos.get_rmw_qos_profile();
         rmw_time_t       rmw_time_deadline = qos_profile.deadline;
@@ -128,17 +128,17 @@ int main(int argc, char* argv[])
 }
 
 
-
-double
-rmw_time_to_seconds(const rmw_time_t & time)
+/**
+ * 参考
+ */ 
+double rmw_time_to_seconds(const rmw_time_t & time)
 {
   double result = static_cast<double>(time.sec);
   result += 1e-9 * time.nsec;
   return result;
 }
 
-void
-print_qos(const rclcpp::QoS & qos)
+void print_qos(const rclcpp::QoS & qos)
 {
   const auto & rmw_qos = qos.get_rmw_qos_profile();
   std::cout << "HISTORY POLICY: ";
