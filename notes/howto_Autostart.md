@@ -207,8 +207,10 @@ After=docker.target
 [Service]
 Type=simple
 
+#指定用户名
+User=helloworld
 ### 示例1: 运行命令行
-ExecStart=/bin/bash -c "export ROS_DOMAIN_ID=50 && && source /home/helloworld/install/setup.bash && bash /home/helloworld/install/alex/script/run.sh"
+ExecStart=/bin/bash -c "echo System start>>/home/helloworld/log.txt && export ROS_DOMAIN_ID=1 && export ROS_LOG_DIR=/home/helloworld/log && source /home/helloworld/install/setup.bash && bash /home/helloworld/install/alex/script/run.sh"
 
 ### 示例2: 运行命令行，启动docker容器并运行ros入口脚本
 ExecStart=/bin/bash -c " echo hello >> /home/project_tc/log.txt && docker start frosty_tu && docker exec -it frosty_tu /ros_entrypoint.sh"
@@ -216,6 +218,7 @@ ExecStart=/bin/bash -c " echo hello >> /home/project_tc/log.txt && docker start 
 ### 示例3: 运行脚本（确保脚本具备可执行权限）
 ExecStart=/home/test.sh
 
+ExecStop=/bin/bash -c "echo System stop>>/home/helloworld/log.txt"
 PrivateTmp=true
 KillMode=control-group
 
@@ -226,7 +229,30 @@ WantedBy=multi-user.target
 
 **将该文件拷贝至目录`/usr/lib/systemd/system/`！**
 
-如果是使用选项2，那么需要先创建运行脚本！
+> 注意：
+>
+> - 其中路径名一定要使用绝对路径！！！
+>
+> - 尽量使用User关键字指定用户名，不然导致在终端输入`ros2 node list`无法打印正在运行的节点
+>
+> - ros2运行日志文件可能不会马上更新，需要服务启动后，等一会（一两分钟）才更新，也就是日志记录不是实时一行行写入，而是隔一会写一大块！
+>
+> - 如果是使用选项3，那么需要先创建运行脚本/home/test.sh！
+>
+>   赋权限`sudo chmod u+x /home/test.sh`
+>
+>   添加脚本内容，例如如下：
+>
+>   ```shell
+>   #!/bin/bash
+>   echo System start>>/home/helloworld/log.txt
+>   export ROS_DOMAIN_ID=1
+>   export ROS_LOG_DIR=/home/helloworld/log
+>   source /home/helloworld/install/setup.bash
+>   bash /home/helloworld/install/alex/script/run.sh
+>   ```
+>
+>   
 
 2. 服务控制
 
@@ -245,7 +271,10 @@ systemctl start hello_ros2.service
 - 查看服务结果
 
 ```shell
+# 实时显示程序打印的结果
 $ sudo journalctl -u hello_ros2.service -f
+# 或者，显示当前
+$ systemctl status hello_ros2.service
 ```
 
 - 开机自启动
