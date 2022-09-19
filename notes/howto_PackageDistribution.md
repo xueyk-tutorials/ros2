@@ -295,3 +295,13 @@ data_files=[
 			|-- setup.py
 ```
 
+
+
+## 发布至社区
+
+### rosdistro
+
+如何给ROS社区贡献自己的开发成果，请参考相关说明：https://github.com/ros/rosdistro/blob/master/CONTRIBUTING.md#rosdep-rules-contributions。
+
+如何希望查看当前foxy版本所有发布的package，可以查看：https://github.com/ros/rosdistro/blob/master/foxy/distribution.yaml
+

@@ -129,6 +129,36 @@ python3-vcstool \
 wget
 ```
 
+## package的安装
+
+如果在开发过程中，你的工程需要依赖其他的package，那么就需要安装这些依赖了。安装依赖有两种方式，一种是通过`rosdep`工具，一种是通过apt命令。
+
+### rosdep
+
+使用前先初始化
+
+```shell
+$ sudo rosdep init
+$ rosdep update
+```
+
+通过`rosdep install`命令检查package.xml内的依赖包，然后下载安装。
+
+```shell
+$ cd <你的工程根目录>
+$ rosdep install --from-paths src -y --ignore-src
+```
+
+### apt命令安装
+
+```shell
+sudo apt-get install ros-foxy-turtle-tf2-py ros-foxy-tf2-tools ros-foxy-tf-transformations
+
+sudo apt install ros-foxy-demo-nodes-cpp
+```
+
+## 
+
 ## 卸载
 
 ```shell
@@ -160,16 +190,6 @@ $docker run -it --rm osrf/ros:foxy-desktop ros2 run demo_nodes_cpp talker
 ### 打开第二个终端
 $ docker run -it --rm osrf/ros:foxy-desktop ros2 run demo_nodes_cpp listener
 ```
-
-## 下载package
-
-```shell
-sudo apt-get install ros-foxy-turtle-tf2-py ros-foxy-tf2-tools ros-foxy-tf-transformations
-
-sudo apt install ros-foxy-demo-nodes-cpp
-```
-
-
 
 ## VSCode
 
