@@ -86,7 +86,11 @@ ROS2的通信是基于成熟的DDS，DDS是一套协议标准，各厂商根据�
 
   例如tf2相关API说明在[tf2: Main Page (ros.org)](http://docs.ros.org/en/api/tf2/html/index.html)。
 
+- ROS2各功能包的详细资料
 
+  http://docs.ros.org/en/ros2_packages/
+
+  例如pluginlib的APIhttp://docs.ros.org/en/ros2_packages/humble/api/pluginlib/
 
 ## 基本概念理解
 
