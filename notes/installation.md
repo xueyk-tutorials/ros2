@@ -200,6 +200,12 @@ $ docker run -it --rm osrf/ros:foxy-desktop ros2 run demo_nodes_cpp listener
 sudo apt-get install ros-foxy-turtle-tf2-py ros-foxy-tf2-tools ros-foxy-tf-transformations
 ```
 
+安装包的存放地址为：http://packages.ros.org/ros2/ubuntu
+
+例如下载ros-foxy-intra-process-demo，其链接地址为：
+
+http://packages.ros.org/ros2/ubuntu/pool/main/r/ros-foxy-intra-process-demo/ros-foxy-intra-process-demo_0.9.3-1focal.20220204.173403_amd64.deb
+
 ## VSCode
 
 https://www.allisonthackston.com/articles/vscode-docker-ros2.html

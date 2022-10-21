@@ -4,8 +4,9 @@
  * @Author: xueyuankui
  * @Date: 2022-09-14 22:48:25
  * @LastEditors: xueyuankui
- * @LastEditTime: 2022-09-14 22:54:25
+ * @LastEditTime: 2022-09-23 10:27:43
  */
+#include <iostream>
 #include <pluginlib/class_loader.hpp>
 #include <polygon_base/regular_polygon.hpp>
 
@@ -19,6 +20,10 @@ int main(int argc, char** argv)
 
   try
   {
+    for(auto &name : poly_loader.getDeclaredClasses())
+    {
+      std::cout << "name=" << name << std::endl;
+    }
     std::shared_ptr<polygon_base::RegularPolygon> triangle = poly_loader.createSharedInstance("polygon_plugins::Triangle");
     triangle->initialize(10.0);
 
