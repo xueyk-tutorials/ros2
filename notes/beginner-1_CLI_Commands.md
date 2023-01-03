@@ -4,7 +4,29 @@ ROS2的命令以`ros2`开始
 
 ## ros2 pkg
 
+### 创建功能包
+
+```shell
 ros2 pkg create --build-type ament_python demos_topic --dependencies rclpy
+```
+
+
+
+### 查看功能包路径
+
+命令格式：`ros2 pkg prefix --share <pkg_name>`
+
+例如：
+
+```shell
+$ ros2 pkg prefix --share turtlesim
+```
+
+可以进行命令组合实现更复杂的命令输入：
+
+```shell
+ros2 run rviz2 rviz2 -d $(ros2 pkg prefix --share turtle_tf2_py)/rviz/turtle_rviz.rviz
+```
 
 ## ros2 run
 
@@ -16,14 +38,54 @@ ros2 pkg create --build-type ament_python demos_topic --dependencies rclpy
 - __ns: 设置namespace
 - __params: 加载.yaml文件并传入参数
 - --ros-args: 设置单个参数
+- --remap/-r: 重映射
 
 ### 示例
+
+我们首先看下小海龟节点默认启动后的情况：
+
+```shell
+$ ros2 run turtlesim turtlesim_node       # 启动小海龟
+$ ros2 topic list                         # 查看话题
+/turtle1/cmd_vel
+/turtle1/color_sensor
+/turtle1/pose
+$ ros2 node list                          # 查看节点
+/turtlesim
+```
+
+
 
 #### 设置节点命名空间
 
 ```shell
-$ ros2 run demo_nodes_cpp talker __ns:=/demo __node:=my_talker chatter:=my_topic
+$ ros2 run turtlesim turtlesim_node --ros-args --remap __ns:=/demo --remap __node:=my_turtle
+
+$ ros2 topic list                         # 查看话题
+/demo/turtle1/cmd_vel
+/demo/turtle1/color_sensor
+/demo/turtle1/pose
+$ ros2 node list                          # 查看节点
+/demo/my_turtle
 ```
+
+> 上面命令行不添加`--ros-args --remap`也能运行，只是会报警告，如下：
+>
+> [WARN] [1671161378.198301720] [rcl]: Found remap rule '__ns:=/demo'. This syntax is deprecated. Use '--ros-args --remap __ns:=/demo' instead.
+
+#### 重映射话题名
+
+```shell
+$ ros2 run turtlesim turtlesim_node --ros-args --remap turtle1/cmd_vel:=my_cmd_vel   
+$ ros2 run some_package some_ros_executable --ros-args -r turtle1/cmd_vel:=my_cmd_vel    #等效于上面这个
+
+$ ros2 topic list                         # 查看话题
+/my_cmd_vel
+/turtle1/color_sensor
+/turtle1/pose
+```
+
+
 
 #### 启动节点并设置参数
 
@@ -131,6 +193,8 @@ find
 ```shell
 # 清除turtle移动轨迹
 $ ros2 service call /clear std_srvs/srv/Empty
+# 生成一个新的小海龟
+$ ros2 service call /spawn turtlesim/srv/Spawn "{x: 3.0, y: 2.0, theta: 0.0, name: 'turtle2'}"
 ```
 
 

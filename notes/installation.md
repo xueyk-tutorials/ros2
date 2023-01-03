@@ -300,6 +300,14 @@ $ python3 -m pip uninstall pip setuptools wheel
 $ sudo apt-get --reinstall install python3-setuptools python3-wheel python3-pip
 ```
 
+### rosdep
+```shell
+sudo rosdep init
+[sudo] password for alex: 
+ERROR: cannot download default sources list from:
+https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/sources.list.d/20-default.list
+Website may be down.
+```
 ### 在conda中使用ros2
 
 如果有的python安装包在conda环境下，例如在配置了一个跟踪检测的conda环境，希望在该环境下启动ros2能够调用次环境下的功能包，那么请在`~/.bahsrc`添加如下：

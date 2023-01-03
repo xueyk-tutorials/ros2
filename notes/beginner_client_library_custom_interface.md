@@ -62,6 +62,28 @@ float64 pitch
 float64 yaw
 ```
 
+命名的格式为：
+
+```shell
+^(?!.*__)(?!.*_$)[a-z][a-z0-9_]*$'
+```
+
+类型包括如下
+
+```shell
+bool
+byte
+char
+float32,float64
+int8,uint8
+int16,uint16
+int32,uint32
+int64,uint64
+string
+```
+
+
+
 自定义的消息内容有比较严格的命名规范，如果消息成员命名包含大写字母，会被当做常量。可以直接通过类名+常量名使用定义的常量：
 
 ```python
