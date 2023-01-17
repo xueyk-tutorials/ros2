@@ -2,6 +2,34 @@
 
 ## C++
 
+### 引用自定义功能包
+
+如果我们有两个功能包：pkg_drv，pkg_drone，功能包pkg_drone需要引用pkg_drv中的头文件，则需要在功能包pkg_drv的CMakeLists.txt末尾添加`ament_export_include_directories(include)`，将头文件导出：
+
+```CMAKE
+# pkg_drv/CMakeLists.txt
+ament_export_include_directories(include)
+ament_package()
+```
+
+在功能包pkg_drone需要引用pkg_drv时，CMakeLists.txt需要添加：
+
+```CMAKE
+# pkg_drone/CMakeLists.txt
+find_package(pkg_drv REQUIRED)
+set(dependencies
+  rclcpp
+  pkg_drv
+)
+```
+
+package.xml需要添加:
+
+```xml
+  <depend>rclcpp</depend>
+  <depend>plan_env</depend>
+```
+
 
 
 ### 示例
