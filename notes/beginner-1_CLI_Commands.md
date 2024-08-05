@@ -132,7 +132,9 @@ String value is: Hello world
 
 ## ros2 interface
 
-显示package中的所有消息
+### 显示package中的所有消息
+
+- ros2 interface package [pkg-name]
 
 ```shell
 $ ros2 interface package nav_msgs
@@ -146,9 +148,15 @@ nav_msgs/msg/Odometry
 nav_msgs/srv/GetPlan
 ```
 
+### 查看话题的消息类型
+
+- ros2 interface show [msg-type]
 
 
-## topic相关命令
+
+## ros2 topic
+
+### 命令格式
 
 --include-hidden-topics  hz
 bw                       info
@@ -158,27 +166,56 @@ find                     type
 
 ### 查看当前话题
 
-ros2 topic list
+- ros2 topic list
 
-ros2 topic list -t
+- ros2 topic list -t
 
-### 查看话题的消息类型
 
-ros2 interface show <msg type>
 
 ### 话题发布命令
 
-ros2 topic pub
+**命令格式**
+
+ros2 topic pub [话题名] [消息类型] [消息赋值]
+
+如果话题名不存在，则将新建，如果存在则向该话题发布。
+
+
+
+**消息赋值**
+
+通过双引号对消息进行赋值。
+
+消息描述文件中定义了很多字段，
 
 ```shell
 $ros2 topic pub -r 1 /turtle1/cmd_vel geometry_msgs/msg/Twist "{linear: {x: 2.0, y: 0.0, z: 0.0}, angular: {x: 0.0,y: 0.0,z: 0.0}}"
 ```
+
+- 字符串类型字段
 
 发布的消息类型包括字符串时，字符串需要通过单引号传递进来。
 
 ```shell
 $ ros2 topic pub -r 1 /topic std_msgs/msg/String "{data: 'hello'}"
 ```
+
+- 数组类型字段
+
+如果一个消息`RobotStatus`定义如下：
+
+```shell
+float32[3] position
+float32[3] velocity
+```
+
+那么对数组的赋值应该使用`[]`，例如：
+
+```shell
+$ ros2 topic pub my_msgs/msg/RobotStatus "{position: [1.0, 2.0, 0.0]}, velocity: [0.0, 0.0, 0.0]"
+```
+
+
 
 ## service相关命令
 
