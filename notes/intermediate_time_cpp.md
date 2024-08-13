@@ -69,8 +69,9 @@ typedef enum rcl_clock_type_t
     ```c++
     rclcpp::Time time1(100, 123, RCL_SYSTEM_TIME);
     ```
-    
-    
+
+
+​    
 
      * 通过ROS2内置消息类型进行构造
           *
@@ -82,8 +83,9 @@ typedef enum rcl_clock_type_t
     stamp.nanosec = 123;
     rclcpp::Time time2(stamp);
     ```
-    
-    
+
+
+​    
 
      * 通过结构体rcl_time_point_t进行构造
           *
@@ -279,3 +281,10 @@ RCLCPP_INFO(node->get_logger(), "time: sec=%f, nanosec=%ld", time2.seconds(), ti
 ## 时间同步
 
 https://blog.csdn.net/qq_41943585/article/details/89679198?spm=1001.2101.3001.6661.1&utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-1-89679198-blog-114752452.pc_relevant_multi_platform_whitelistv1_exp2&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-1-89679198-blog-114752452.pc_relevant_multi_platform_whitelistv1_exp2&utm_relevant_index=1
+
+
+
+```bash
+ros2 rmw_uros_sync_session
+```
+
