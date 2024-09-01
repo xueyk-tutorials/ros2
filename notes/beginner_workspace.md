@@ -46,7 +46,7 @@ $ mkdir -p alex_ros2_ws/src
 $ cd alex_ros2_ws/src/
 ```
 
-### 安装编译工具calcon
+### 安装编译工具colcon
 
 ```shell
 sudo apt install python3-colcon-common-extensions

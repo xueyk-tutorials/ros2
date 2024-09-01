@@ -39,6 +39,14 @@ $ curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo 
 $ curl http://repo.ros2.org/repos.key | sudo apt-key add - 
 ```
 
+
+
+> 如果就想使用默认源，避免DNS解析失败，可以通过修改/etc/hosts，添加如下域名信息：
+>
+> ```bash
+> 185.199.108.133 raw.githubusercontent.com   
+> ```
+
 ### 设置软件源
 
 ```shell
@@ -81,6 +89,22 @@ ROS2提供了不同版本，主要区别是功能包数量不同。
 $ sudo apt install ros-foxy-desktop
 ###
 $ sudo apt install ros-foxy-ros-base
+```
+
+### 卸载
+
+```bash
+sudo apt remove ~nros-foxy-* && sudo apt autoremove
+```
+
+将 ROS 2 的软件包信息删除干净
+
+```bash
+sudo rm /etc/apt/sources.list.d/ros2.list
+sudo apt update
+sudo apt autoremove
+# Consider upgrading for packages previously shadowed.
+sudo apt upgrade
 ```
 
 ### 安装自动补全工具
@@ -139,6 +163,18 @@ $ sudo rosdep init
 $ rosdep update
 ```
 
+> rosdep无法连接问题解决方法：
+>
+> 通过修改hosts，添加DNS地址。首先在https://www.ipaddress.com/website/raw.githubusercontent.com/上查找`https://raw.githubusercontent.com`的IP地址，然后编辑`/etc/hosts`文件增加如下：
+>
+> ```bash
+> 185.199.108.133   https://raw.githubusercontent.com
+> ```
+>
+> 这里185.199.108.133是当前查找到的IP地址，如果有变动根据实际修改。
+
+
+
 通过`rosdep install`命令检查package.xml内的依赖包，然后下载安装。
 
 ```shell
@@ -154,7 +190,7 @@ sudo apt-get install ros-foxy-turtle-tf2-py ros-foxy-tf2-tools ros-foxy-tf-trans
 sudo apt install ros-foxy-demo-nodes-cpp
 ```
 
-## 
+
 
 ## 卸载
 
