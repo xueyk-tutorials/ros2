@@ -236,6 +236,17 @@ $ ros2 service call /spawn turtlesim/srv/Spawn "{x: 3.0, y: 2.0, theta: 0.0, nam
 
 
 
+## ros2 bag
+
+### 记录
+
+- 记录话题：ros2 bag record topic-name1  topic-name2
+- 记录所有话题：ros2 bag record -a
+
+### 播放
+
+- 播放（1倍速）：ros2 bag play rosbag2_2021_10_03-15_31_41_0.db3 -r 10
+
 ## rqt
 
 ### rqt_gui

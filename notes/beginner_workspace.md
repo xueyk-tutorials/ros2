@@ -88,9 +88,10 @@ Summary: 0 packages finished [0.15s]
 colcon build后边还可以跟一些常用的参数：  
 
 1. --packages-up-to ：编译指定的功能包，而不是整个工作空间
-2. --symlink-install ：节省每次重建python脚本的时间
+2. --symlink-install ：建立软链接，节省每次重建python脚本的时间，修改launch.py文件不用重新编译
 3. --packages-select： 选择要编译的package
 4. --event-handlers console_direct+ ：在终端中显示编译过程中的详细日志
+5. ----parallel-workers：多线程编译；
 
 
 

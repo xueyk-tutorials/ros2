@@ -11,11 +11,18 @@ ROS2更新很快，至今为止已经发布了很多版本，根据发行时间�
 
 在ROS2的学习中，同样的代码可能无法在不同版本上运行，所以一定注意你机器上安装的ROS2版本，避免造成`明明代码在其他机器上可以运行为什么在我机器上无法运行的问题`。所以写程序最要参考对应版本的文档说明，在最下方可以选择版本。
 
-## 在线安装ROS2
+## 在线安装ROS2(ubuntu20.04-amd64)
 
 这里我们以Ubuntu20.04下安装ros2-foxy为例！
 
 为了加快安装速度，建议将Ubuntu软件源设置为国内镜像。
+
+### 更换PIP源
+
+```bash
+pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+pip3 config set global.trusted-host https://pypi.tuna.tsinghua.edu.cn
+```
 
 ### 设置编码
 
@@ -24,8 +31,6 @@ $ sudo locale-gen en_US en_US.UTF-8
 $ sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 $ export LANG=en_US.UTF-8
 ```
-
-
 
 ### 下载GPGkey
 
@@ -39,8 +44,6 @@ $ curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo 
 $ curl http://repo.ros2.org/repos.key | sudo apt-key add - 
 ```
 
-
-
 > 如果就想使用默认源，避免DNS解析失败，可以通过修改/etc/hosts，添加如下域名信息：
 >
 > ```bash
@@ -48,6 +51,8 @@ $ curl http://repo.ros2.org/repos.key | sudo apt-key add -
 > ```
 
 ### 设置软件源
+
+设置ROS源，源定义会放到文件`/etc/apt/sources.list.d/ros2-latest.list`中。
 
 ```shell
 ### 添加源
@@ -61,6 +66,7 @@ sudo sh -c 'echo "deb [arch=$(dpkg --print-architecture)] http://mirror.tuna.tsi
 
 ```shell
 $ sudo apt update
+$ sudo apt upgrade
 ```
 
 > **注意：**
@@ -90,6 +96,10 @@ $ sudo apt install ros-foxy-desktop
 ###
 $ sudo apt install ros-foxy-ros-base
 ```
+
+> 注意：
+>
+> 在arm64V8环境下安装ros-foxy-ros-base过程中间可能需要输入所在地理位置，依次输入Asia、Shanghai即可。
 
 ### 卸载
 
@@ -150,13 +160,37 @@ python3-vcstool \
 wget
 ```
 
+### 测试
+
+- 安装demo-nodes-cpp
+
+```bash
+apt-get install ros-foxy-demo-nodes-cpp
+```
+
+- 运行发布
+
+```bash
+ros2 run demo_nodes_cpp talker
+```
+
+- 运行订阅
+
+```bash
+ros2 run demo_nodes_cpp listener
+```
+
+
+
 ## package的安装
 
 如果在开发过程中，你的工程需要依赖其他的package，那么就需要安装这些依赖了。安装依赖有两种方式，一种是通过`rosdep`工具，一种是通过apt命令。
 
+> 很多时候我们获取了ROS2软件包，但这些软件包可能依赖其他软件，那么我们可以在该软件包路径下，运行rosdep install命令来安装这些依赖。
+
 ### rosdep
 
-使用前先初始化
+使用前先初始化。
 
 ```shell
 $ sudo rosdep init
@@ -190,8 +224,6 @@ sudo apt-get install ros-foxy-turtle-tf2-py ros-foxy-tf2-tools ros-foxy-tf-trans
 sudo apt install ros-foxy-demo-nodes-cpp
 ```
 
-
-
 ## 卸载
 
 ```shell
@@ -223,6 +255,25 @@ $docker run -it --rm osrf/ros:foxy-desktop ros2 run demo_nodes_cpp talker
 ### 打开第二个终端
 $ docker run -it --rm osrf/ros:foxy-desktop ros2 run demo_nodes_cpp listener
 ```
+
+
+
+### 备份镜像
+
+启动容器后，通过如下命令将容器制作镜像包：
+
+```bash
+$ docker commit -m "drone develop" -a="xueyk" ba2d4c drone_dev_ros2:v1
+$ docker save -o /root/Desktop/drone_dev_ros2.tar drone_dev_ros2:v1
+```
+
+将镜像包拷贝至其他计算机，通过如下命令加载镜像：
+
+```bash
+$ docker load -i /root/Desktop/drone_dev_ros2.tar
+```
+
+
 
 ## 安装指定功能包
 

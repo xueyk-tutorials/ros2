@@ -4,12 +4,34 @@
 
 ### 下载镜像
 
+#### AMD64
+
 参考：http://docs.ros.org/en/foxy/How-To-Guides/Run-2-nodes-in-single-or-separate-docker-containers.html
 
 ```shell
 ## 下载镜像
 $ docker pull osrf/ros:foxy-desktop
 ```
+
+#### ARM架构
+
+- arm32v7
+
+参考：https://hub.docker.com/r/arm32v7/ros/tags。
+
+```bash
+docker pull arm32v7/ros:noetic-ros-base-focal
+```
+
+
+
+也可以指定从国内镜像拉取：
+
+```bash
+docker pull docker.mirrors.ustc.edu.cn/arm32v7/ros:noetic-ros-base-focal
+```
+
+
 
 ### 运行
 
@@ -33,9 +55,13 @@ $ docker run -it -v /home/alex/docker_volume:/home osrf/ros:foxy-desktop
 
 ```shell
 ### 打开第一个终端
-$docker run -it --rm osrf/ros:foxy-desktop ros2 run demo_nodes_cpp talker
+$ docker run -it --rm osrf/ros:foxy-desktop ros2 run demo_nodes_cpp talker
+docker run --name="drone2" -it --rm drone_swarm ros2 run demo_nodes_cpp talker
+docker run --name="drone3" -it --rm drone_swarm ros2 run demo_nodes_cpp listener
 ### 打开第二个终端
 $ docker run -it --rm osrf/ros:foxy-desktop ros2 run demo_nodes_cpp listener
+
+
 ```
 
 #### 示例：两个终端进入同一个容器
@@ -114,7 +140,80 @@ root@alex-Mi-Gaming-Laptop-15-6:/# export ROS_DOMAIN_ID=1
 
 参考：[Connecting Remote Robots Using ROS2, Docker & VPN | Husarnet](https://husarnet.com/blog/ros2-docker)
 
-## 启动容器后运行ROS2
+## 容器启动后自动运行ROS2
+
+如果希望启动容器后就能够运行ROS2，目前有两种思路：
+
+1）在Dockerfile使用CMD命令增加启动命令（例如运行某个脚本，然后在脚本中添加ROS2节点运行命令），通过Dockerfile构建的新镜像创建容器后会自动运行启动命令；
+
+2）在创建容器时添加启动命令。
+
+### 方式一：通过Dockerfile
+
+#### 创建Dockerfile
+
+在宿主机创建一个文件夹并在文件夹添加Dockerfile文件，内容如下：
+
+```bash
+FROM drone_dev_ros2:v1
+COPY start_ros2.sh /home/
+RUN echo "/opt/ros/foxy/setup.bash">>~/.bashrc \ 
+    && echo "export ROS_DOMAIN_ID=0">>~/.bashrc
+    
+CMD ["/bin/bash", "/home/start_ros2.sh"]
+```
+
+在该文件夹下创建start_ros2.sh并增加**运行权限**，添加内容如下：
+
+```bash
+#!/bin/bash
+
+source /opt/ros/foxy/setup.bash
+export ROS_DOMAIN_ID=0
+ros2 run demo_nodes_cpp talker
+
+LOG_FILE="/home/log.txt"
+touch ${LOG_FILE}
+echo "$(date)">>${LOG_FILE}
+cnt=1
+while [ ${cnt} -le 3 ]
+do
+    echo "$(date): ${cnt}">>${LOG_FILE}
+    sleep 1s
+    let cnt++
+done
+```
+
+#### 构建镜像
+
+在Dockerfile文件所在目录下运行如下命令：
+
+```bash
+docker build -t drone_swarm .
+```
+
+#### 运行
+
+
+- 创建并启动方式1
+
+```bash
+docker run -it drone_swarm
+```
+
+当前终端创建并启动容器，由于容器启动后运行start_ros2.sh脚本并且持续打印20s日志到文件中，故当前终端在此期间被阻塞。
+
+- 创建并启动方式2
+
+```bash
+docker run -d drone_swarm
+```
+
+当前终端创建并启动容器，容器启动后运行start_ros2.sh脚本并且持续打印20s日志到文件中，由于以后台方式运行故当前终端不会阻塞。
+
+
+
+### 方式二：命令行启动
 
 下载的ROS2 docker镜像，一般都会提供ROS入口脚本（容器根目录下的`ros_entrypoint.sh`），该脚本是容器启动的默认脚本，用于添加ROS2环境变量，一般内容如下：
 
@@ -127,7 +226,7 @@ source "/opt/ros/$ROS_DISTRO/setup.bash" --
 exec "$@"
 ```
 
-### 运行单个节点
+#### 运行单个节点
 
 创建好ROS2容器，可以直接输入运行talker节点的命令：
 
@@ -137,7 +236,7 @@ $ docker run -it osrf/ros:foxy-desktop ros2 run demo_nodes_cpp talker
 
 
 
-### 运行launch（方法一）
+#### 运行launch（方法一）
 
 通过在ROS2容器启动脚本`ros_entrypoint.sh`中添加用户的ROS2工程的环境变量，通过命令行启动。
 
@@ -193,7 +292,7 @@ $ docker exec -it <容器ID> /ros_entrypoint.sh
 
 **容器启动后，ctrl+c会直接停止节点和容器！**
 
-### 运行launch（方法二）
+#### 运行launch（方法二）
 
 与方法一基本差不多，只不过是将launch启动命令一起添加至启动脚本`ros_entrypoint.sh`中
 
@@ -211,7 +310,7 @@ exec "$@"
 
 这种方法，启动容器后，ctrl+c后，节点停止，容器继续运行！
 
-### 运行launch（方法三）
+#### 运行launch（方法三）
 
 这里我们通过在容器根目录中自己创建启动脚本的方式，运行launch。
 
@@ -255,6 +354,8 @@ exec "$@"
    ```shell
    $ docker exec -it <容器ID> /start_ros2.sh
    ```
+
+
 
 
 

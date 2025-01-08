@@ -4,13 +4,11 @@
 
 [How to start ROS2 node automatically after starting the system? - ROS Answers: Open Source Q&A Forum](https://answers.ros.org/question/333968/how-to-start-ros2-node-automatically-after-starting-the-system/)
 
-## 方法综述
 
 
+## Ubuntu：自带开机启动
 
-### 方法1：ubuntu自带开机启动（success）
-
-思路：通过ubuntu的`gnome-session-properties`功能启动
+思路：通过ubuntu的`gnome-session-properties`功能启动。
 
 该方法需要ubuntu为Desktop版本！
 
@@ -37,13 +35,238 @@
 
 
 
-### 方法2：通过python文件(fail)
+## Ubuntu：通过systemctl启动ROS2
 
-思路：首先通过ubuntu的service添加开机自启动shell脚本，该shell脚本会运行一个python程序，python启动一个网络监听线程，等待接收控制指令，当接收到其他计算机发送的启动指令后，通过os.system()启动shell命令！
+思路：Systemctl是linux系统继init.d之后的一个systemd工具，主要负责控制systemd系统和管理系统服务。systemd即为system daemon（系统守护进程）,是linux下的一种init软件。
+
+这种方式不需要Ubuntu是desktop版本，支持Ubuntu18.04之后版本。
+
+1. 添加服务
+
+创建hello_ros2.service文件，内容如下：
+
+```bash
+[Unit]
+Description=ros2 launch script
+After=docker.target
+
+[Service]
+Type=simple
+
+#指定用户名
+User=helloworld
+### 示例1: 运行命令行
+ExecStart=/bin/bash -c "echo System start>>/home/helloworld/log.txt && export ROS_DOMAIN_ID=1 && export ROS_LOG_DIR=/home/helloworld/log && source /home/helloworld/install/setup.bash && bash /home/helloworld/install/alex/script/run.sh"
+
+### 示例2: 运行脚本（确保脚本具备可执行权限）
+ExecStart=/home/test.sh
+
+ExecStop=/bin/bash -c "echo System stop>>/home/helloworld/log.txt"
+PrivateTmp=true
+KillMode=control-group
+
+
+[Install]
+WantedBy=multi-user.target
+```
+
+**将该文件拷贝至目录`/usr/lib/systemd/system/`！**
+
+> 注意：
+>
+> - 其中路径名一定要使用绝对路径！！！
+>
+> - 尽量使用User关键字指定用户名，不然导致在终端输入`ros2 node list`无法打印正在运行的节点
+>
+> - ros2运行日志文件可能不会马上更新，需要服务启动后，等一会（一两分钟）才更新，也就是日志记录不是实时一行行写入，而是隔一会写一大块！
+>
+> - 如果是使用选项3，那么需要先创建运行脚本/home/test.sh！
+>
+>   赋权限`sudo chmod u+x /home/test.sh`
+>
+>   添加脚本内容，例如如下：
+>
+>   ```shell
+>   #!/bin/bash
+>   echo System start>>/home/helloworld/log.txt
+>   export ROS_DOMAIN_ID=1
+>   export ROS_LOG_DIR=/home/helloworld/log
+>   source /home/helloworld/install/setup.bash
+>   bash /home/helloworld/install/alex/script/run.sh
+>   ```
+
+2. 服务控制
+
+- 重新加载
+
+```shell
+sudo systemctl daemon-reload
+```
+
+- 启动服务
+
+```shell
+systemctl start hello_ros2.service
+```
+
+- 查看服务结果
+
+```shell
+# 实时显示程序打印的结果
+$ sudo journalctl -u hello_ros2.service -f
+# 或者，显示当前
+$ systemctl status hello_ros2.service
+```
+
+- 开机自启动
+
+```shell
+systemctl enable hello_ros2.service
+```
+
+其他命令
+
+```shell
+#停止服务
+systemctl stop hello_ros2.service
+#查看已启动的服务列表
+systemctl list-unit-files|grep enabled
+#显示所有已启动的服务
+systemctl list-units --type=service
+```
 
 
 
-## 开机启动docker
+
+
+## 开机启动docker容器进而自动启动ROS2
+
+### 通过Dockerfile构建镜像
+
+需要首先准备一个具备ROS2环境的docker镜像，然后使用Dockerfile基于该镜像再构建一个包含ROS2自启动命令的镜像。
+
+在宿主机创建一个文件夹并在文件夹添加Dockerfile文件，内容如下：
+
+```bash
+FROM osrf_ros2:v1
+COPY start_ros2.sh /home/
+RUN echo "/opt/ros/foxy/setup.bash">>~/.bashrc \ 
+    && echo "export ROS_DOMAIN_ID=0">>~/.bashrc
+    
+CMD ["/bin/bash", "/home/start_ros2.sh"]
+```
+
+> 这里osrf_ros2就是事先准备好的镜像。
+
+在宿主机文件夹下创建start_ros2.sh并增加**运行权限**，添加内容如下：
+
+```bash
+#!/bin/bash
+
+source /opt/ros/foxy/setup.bash
+export ROS_DOMAIN_ID=0
+ros2 run demo_nodes_cpp talker
+
+LOG_FILE="/home/log.txt"
+touch ${LOG_FILE}
+echo "$(date)">>${LOG_FILE}
+cnt=1
+while [ ${cnt} -le 3 ]
+do
+    echo "$(date): ${cnt}">>${LOG_FILE}
+    sleep 1s
+    let cnt++
+done
+```
+
+### 构建镜像
+
+在Dockerfile文件所在目录下运行如下命令：
+
+```bash
+docker build -t drone_swarm .
+# 如果添加版本标签的话如下，不添加默认是latest
+docker build -t drone_swarm:v1 .
+```
+
+### 创建容器
+
+通过如下命令创建容器：
+
+```bash
+docker run -d --net=host drone_swarm
+```
+
+如果容器启动后希望修改ROS2启动脚本内容，则可以在宿主机上通过`docker cp`命令将容器内的文件拷贝出来，修改后再拷贝回去。
+
+```bash
+# 从容器内拷贝出启动文件
+docker cp drone_swarm:/home/start_ros2.sh .
+# 对启动文件进行修改
+vi start_ros2.sh
+# 拷贝到容器
+docker cp . drone_swarm:/home/start_ros2.sh
+```
+
+### 宿主机开机运行docker容器
+
+创建一个启动脚本，通过systemctl等方式开机运行该启动脚本。
+
+脚本如下：
+
+```bash
+#!/bin/bash
+
+# 输入创建的镜像名称
+container="drone_swarm"
+
+log_file="/root/Desktop/log.txt"
+touch $log_file
+echo "[$(date "+%Y-%m-%d %H:%M:%S") start_docker.sh]: Try to start docker container">>$log_file
+
+flag_success=false
+# wait until docker start
+cnt=1
+while [ $cnt -le 5 ]
+do
+    echo "[$(date "+%Y-%m-%d %H:%M:%S") start_docker.sh]: Trying ${cnt}...">>$log_file
+    echo $(docker version)>>$log_file
+    is_running=$(docker version |grep "Server:" | awk '{print $1}')
+    if [ -z "${is_running}" ]; then
+        echo "[$(date "+%Y-%m-%d %H:%M:%S") start_docker.sh]: Docker not running">>$log_file
+        echo $(docker version)>>$log_file
+    else
+        echo "[$(date "+%Y-%m-%d %H:%M:%S") start_docker.sh]: Docker already in running">>$log_file
+        flag_success=true
+        # start container
+        docker start ${container}
+        sleep 3s
+
+        id=$(docker ps |grep "${container}" | awk '{print $1}')
+        if [ -z "${id}" ]; then
+            echo "[$(date "+%Y-%m-%d %H:%M:%S") start_docker.sh]: Start container failed">>$log_file
+        else
+            docker exec -it ${id} /bin/bash
+            echo "[$(date "+%Y-%m-%d %H:%M:%S") start_docker.sh]: Start docker container success!">>$log_file
+        fi
+        break
+    fi
+    let cnt++
+    sleep 1s
+done
+
+if [ "${flag_success}" = true ]; then
+    echo "[$(date "+%Y-%m-%d %H:%M:%S") start_docker.sh]: Success">>$log_file
+else
+    echo "[$(date "+%Y-%m-%d %H:%M:%S") start_docker.sh]: Failed">>$log_file
+fi
+```
+
+这个脚本首先会判断docker服务是否启动，服务启动后尝试运行容器，总计尝试多次直到成功。
+
+
+
+## 开机启动dockers容器然后手动启动ROS2
 
 本节要实现的功能是开机启动docker容器，并在docker容器中运行ros！
 
@@ -191,106 +414,7 @@ exec "$@"
    $ docker exec -it <容器ID> /start_ros2.sh
    ```
 
-### 通过systemctl启动
-
-Systemctl是linux系统继init.d之后的一个systemd工具，主要负责控制systemd系统和管理系统服务。systemd即为system daemon（系统守护进程）,是linux下的一种init软件。
-
-1. 添加服务
-
-创建hello_ros2.service文件，内容如下：
-
-```bash
-[Unit]
-Description=ros2 launch script
-After=docker.target
-
-[Service]
-Type=simple
-
-#指定用户名
-User=helloworld
-### 示例1: 运行命令行
-ExecStart=/bin/bash -c "echo System start>>/home/helloworld/log.txt && export ROS_DOMAIN_ID=1 && export ROS_LOG_DIR=/home/helloworld/log && source /home/helloworld/install/setup.bash && bash /home/helloworld/install/alex/script/run.sh"
-
-### 示例2: 运行命令行，启动docker容器并运行ros入口脚本
-ExecStart=/bin/bash -c " echo hello >> /home/project_tc/log.txt && docker start frosty_tu && docker exec -it frosty_tu /ros_entrypoint.sh"
-
-### 示例3: 运行脚本（确保脚本具备可执行权限）
-ExecStart=/home/test.sh
-
-ExecStop=/bin/bash -c "echo System stop>>/home/helloworld/log.txt"
-PrivateTmp=true
-KillMode=control-group
 
 
-[Install]
-WantedBy=multi-user.target
-```
 
-**将该文件拷贝至目录`/usr/lib/systemd/system/`！**
-
-> 注意：
->
-> - 其中路径名一定要使用绝对路径！！！
->
-> - 尽量使用User关键字指定用户名，不然导致在终端输入`ros2 node list`无法打印正在运行的节点
->
-> - ros2运行日志文件可能不会马上更新，需要服务启动后，等一会（一两分钟）才更新，也就是日志记录不是实时一行行写入，而是隔一会写一大块！
->
-> - 如果是使用选项3，那么需要先创建运行脚本/home/test.sh！
->
->   赋权限`sudo chmod u+x /home/test.sh`
->
->   添加脚本内容，例如如下：
->
->   ```shell
->   #!/bin/bash
->   echo System start>>/home/helloworld/log.txt
->   export ROS_DOMAIN_ID=1
->   export ROS_LOG_DIR=/home/helloworld/log
->   source /home/helloworld/install/setup.bash
->   bash /home/helloworld/install/alex/script/run.sh
->   ```
->
->   
-
-2. 服务控制
-
-- 重新加载
-
-```shell
-sudo systemctl daemon-reload
-```
-
-- 启动服务
-
-```shell
-systemctl start hello_ros2.service
-```
-
-- 查看服务结果
-
-```shell
-# 实时显示程序打印的结果
-$ sudo journalctl -u hello_ros2.service -f
-# 或者，显示当前
-$ systemctl status hello_ros2.service
-```
-
-- 开机自启动
-
-```shell
-systemctl enable hello_ros2.service
-```
-
-其他命令
-
-```shell
-#停止服务
-systemctl stop hello_ros2.service
-#查看已启动的服务列表
-systemctl list-unit-files|grep enabled
-#显示所有已启动的服务
-systemctl list-units --type=service
-```
 
